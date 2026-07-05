@@ -35,7 +35,7 @@ void main ()
 
     final switch (classified.kind)
     {
-        case classified.Kind.Fraction:
+        case classified.Kind.Fraction7:
         {
             char[128] buf;
             size_t n = fraction_vm (classified, buf[]);
@@ -43,7 +43,7 @@ void main ()
             break;
         }
 
-        case classified.Kind.Invalid:
+        case typeof (classified.kind).Invalid:
         {
             char[128] buf;
             size_t n = invalid_vm (classified, buf[]);
