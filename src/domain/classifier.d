@@ -13,7 +13,7 @@ Classified classify (Integer_Pairs input)
     if (input.y != 0)
     {
         result.kind = Classified.Kind.Fraction;
-        result.fraction = Fraction (numerator: input.x,
+        result.fraction = Fraction (numerator:   input.x,
                                     denominator: input.y);
     }
     else

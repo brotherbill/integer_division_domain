@@ -1,26 +1,28 @@
 module utility.int_to_decimal;
 
+// Return value is length of buffer used. If buffer is too small, the function will assert.
 @safe pure nothrow @nogc
-size_t int_to_dec(int value, char[] buf)
+size_t int_to_decimal(int value, char[] buf)
 {
     // Handle zero explicitly
     if (value == 0)
     {
-        assert(buf.length >= 1);
+        assert(0 < buf.length);
         buf[0] = '0';
         return 1;
     }
 
     bool negative = value < 0;
-    uint v = negative ? cast(uint)(-value) : cast(uint)value;
+    uint v = negative ? cast(uint)(-value) : cast(uint)value;  // Absolute value as unsigned integer
 
     size_t pos = 0;
 
     // Write digits in reverse order
-    while (v > 0)
+    while (0 < v)
     {
         assert(pos < buf.length);
-        buf[pos++] = cast(char)('0' + (v % 10));
+        buf[pos] = cast(char)('0' + (v % 10));
+        pos = pos + 1;
         v /= 10;
     }
 
@@ -28,7 +30,8 @@ size_t int_to_dec(int value, char[] buf)
     if (negative)
     {
         assert(pos < buf.length);
-        buf[pos++] = '-';
+        buf[pos] = '-';
+        pos = pos + 1;
     }
 
     // Reverse digits

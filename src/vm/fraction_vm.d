@@ -27,26 +27,37 @@ size_t fraction_vm (Classified input, scope char[] buffer)
         prefixR.length + rlen;
 
     // Assert buffer is large enough
-    assert(buffer.length >= needed,
-           "fraction_vm: buffer too small");
+    assert(needed <= buffer.length, "fraction_vm: buffer too small");
 
     size_t pos = 0;
 
     // Write prefixQ
     foreach (c; prefixQ)
-        buffer[pos++] = c;
+    {
+        buffer[pos] = c;
+        pos = pos + 1;  
+    }
 
     // Write quotient digits
     foreach (i; 0 .. qlen)
-        buffer[pos++] = qbuf[i];
+    {
+        buffer[pos] = qbuf[i];
+        pos = pos + 1;
+    }
 
     // Write prefixR
     foreach (c; prefixR)
-        buffer[pos++] = c;
+    {
+        buffer[pos] = c;
+        pos = pos + 1;
+    }
 
     // Write remainder digits
     foreach (i; 0 .. rlen)
-        buffer[pos++] = rbuf[i];
+    {
+        buffer[pos] = rbuf[i];
+        pos = pos + 1;
+    }
 
     return pos;
 }

@@ -1,59 +1,88 @@
 module utility.prompt_for_int;
 
-import std.algorithm.searching : canFind;
-import std.conv   : to;
-import std.format : format;
-import std.stdio  : readln, write, writeln;
+import std.stdio : readln, write, writeln;
 import std.string : strip;
+
+// UL-grade parser
+@safe pure nothrow @nogc
+bool try_parse_int(string input, out int result)
+{
+    size_t start = 0;
+    size_t end   = input.length;
+
+    while (start < end && (input[start] == ' ' || input[start] == '\t'))
+        ++start;
+
+    while (end > start && (input[end - 1] == ' ' || input[end - 1] == '\t'))
+        --end;
+
+    if (start == end)
+        return false;
+
+    bool negative = false;
+    size_t i = start;
+
+    if (input[i] == '-')
+    {
+        negative = true;
+        ++i;
+        if (i == end)
+            return false;
+    }
+    else if (input[i] == '+')
+    {
+        ++i;
+        if (i == end)
+            return false;
+    }
+
+    int value = 0;
+
+    for (; i < end; ++i)
+    {
+        char c = input[i];
+
+        if (c < '0' || c > '9')
+            return false;
+
+        int digit = c - '0';
+
+        int newValue = value * 10 + digit;
+        if (newValue < value)
+            return false;
+
+        value = newValue;
+    }
+
+    result = negative ? -value : value;
+    return true;
+}
+
+// ------------------------------------------------------------
+// These MUST be in this module so app.d can import them
+// ------------------------------------------------------------
 
 struct Prompt_Result
 {
-    bool has_value;  // true if the user provided a valid integer, false if they quit
-    int  value;      // The integer value provided by the user, valid only if has_value is true.  0 otherwise.
-}
+    bool has_value;
+    int  value;
+};
 
-private bool try_parse_int (string input, out int result)
-{
-    input = input.strip ();
-
-    if (input.canFind ('.'))
-        return false;   // Reject floating-point numbers
-
-    // Remove commas and underscores from the input
-    string cleaned;
-    foreach (c; input)
-    {
-        if (c == ',' || c == '_') 
-            continue;
-        cleaned = cleaned ~ c;
-    }
-
-    try
-    {
-        result = to!int (cleaned);
-        return true;  // Successfully parsed an integer, in range of int
-    }
-    catch (Exception)
-    {
-        return false;  // Parsing failed, likely due to out-of-range value or garbage input
-    }
-}
-
-Prompt_Result prompt_for_int (string prompt = "Enter an integer")
+Prompt_Result prompt_for_int(string prompt = "Enter an integer")
 {
     while (true)
     {
-        write (prompt, " (or type 'q' to quit): ");
+        write(prompt, " (or type 'q' to quit): ");
 
-        string input = readln ().strip ();
+        string input = readln().strip();
 
         if (input == "q" || input == "Q")
-            return Prompt_Result (false, 0);  // User chose to quit
+            return Prompt_Result(false, 0);
 
         int parsed;
-        if (try_parse_int (input, parsed))
+        if (try_parse_int(input, parsed))
             return Prompt_Result(true, parsed);
 
-        writeln ("Invalid integer. Type 'q' to quit or try again.");
+        writeln("Invalid integer. Type 'q' to quit or try again.");
     }
 }
