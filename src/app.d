@@ -3,26 +3,53 @@ module app;
 import std.stdio  : writeln;
 import std.format : format;
 
-import utility.prompt_for_int : prompt_for_int, PromptResult;
+import utility.prompt_for_int : prompt_for_int, Prompt_Result;
 
-void main()
+import domain.integer_pairs : Integer_Pairs;
+import domain.classifier    : classify;
+import vm.fraction_vm       : fraction_vm;
+import vm.invalid_vm        : invalid_vm;
+
+// main has no attributes because it performs I/O
+void main ()
 {
-    PromptResult num = prompt_for_int("Enter numerator");
-    if (!num.hasValue)
+    Prompt_Result num = prompt_for_int ("Enter numerator");
+    if (!num.has_value)
     {
-        writeln("User quit. Closing app.");
+        writeln ("User quit. Closing app.");
         return;
     }
 
-    PromptResult den = prompt_for_int("Enter denominator");
-    if (!den.hasValue)
+    Prompt_Result den = prompt_for_int ("Enter denominator");
+    if (!den.has_value)
     {
-        writeln("User quit. Closing app.");
+        writeln ("User quit. Closing app.");
         return;
     }
 
-    writeln("Numerator:   ", format("%,d", num.value));
-    writeln("Denominator: ", format("%,d", den.value));
+    Integer_Pairs input = Integer_Pairs (x: num.value,
+                                         y: den.value);
 
-    writeln("Done.");
+    auto classified = classify (input);
+
+    final switch (classified.kind)
+    {
+        case typeof (classified.kind).Fraction:
+        {
+            char[128] buf;
+            size_t n = fraction_vm (classified, buf[]);
+            writeln (buf[0 .. n]);
+            break;
+        }
+
+        case typeof (classified.kind).Invalid:
+        {
+            char[128] buf;
+            size_t n = invalid_vm (classified, buf[]);
+            writeln (buf[0 .. n]);
+            break;
+        }
+    }
+
+    writeln ("Done.");
 }
