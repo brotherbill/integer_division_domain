@@ -7,6 +7,12 @@ struct Fraction
     int numerator;
     int denominator;
 
+    static @safe pure nothrow @nogc
+    Fraction make (in int a_numerator, in int a_denominator)
+    {
+        return Fraction (a_numerator, a_denominator);
+    }
+
     @safe pure nothrow @nogc
     int quotient () const
     {
@@ -17,6 +23,11 @@ struct Fraction
     int remainder () const
     {
         return numerator % denominator;
+    }
+
+    invariant 
+    {
+        assert (denominator != 0, "Denominator must not be zero.");
     }
 }
 

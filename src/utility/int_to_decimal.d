@@ -4,7 +4,7 @@ module utility.int_to_decimal;
 
 // Return value is length of buffer used. If buffer is too small, the function will assert.
 @safe pure nothrow @nogc
-size_t int_to_decimal(int value, char[] buf)
+size_t int_to_decimal(in int value, char[] buf)
 {
     // Handle zero explicitly
     if (value == 0)
@@ -25,7 +25,7 @@ size_t int_to_decimal(int value, char[] buf)
         assert(pos < buf.length);
         buf[pos] = cast(char)('0' + (v % 10));
         pos = pos + 1;
-        v /= 10;
+        v = v / 10;
     }
 
     // Add minus sign if needed

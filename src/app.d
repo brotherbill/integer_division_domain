@@ -22,21 +22,20 @@ void main ()
         return;
     }
 
-    Prompt_Result den = prompt_for_int ("Enter denominator");
+    Prompt_Result den = prompt_for_int (prompt: "Enter denominator");
     if (!den.has_value)
     {
         writeln ("User quit. Closing app.");
         return;
     }
 
-    Integer_Pairs input = Integer_Pairs (x: num.value,
-                                         y: den.value);
+    Integer_Pairs contender = Integer_Pairs.make (a_x: num.value, a_y: den.value);
 
-    auto classified = classify (input);
+    auto classified = classify (contender);
 
     final switch (classified.kind)
     {
-        case typeof (classified.kind).Fraction:
+        case classified.Kind.Fraction:
         {
             char[128] buf;
             size_t n = fraction_vm (classified, buf[]);
@@ -44,7 +43,7 @@ void main ()
             break;
         }
 
-        case typeof (classified.kind).Invalid:
+        case classified.Kind.Invalid:
         {
             char[128] buf;
             size_t n = invalid_vm (classified, buf[]);

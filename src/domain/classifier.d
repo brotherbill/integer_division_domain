@@ -8,20 +8,19 @@ import domain.invalid       : Invalid;
 import domain.classified    : Classified;
 
 @safe pure nothrow @nogc
-Classified classify (Integer_Pairs input)
+Classified classify (in Integer_Pairs a_pair)
 {
     Classified result;
 
-    if (input.y != 0)
+    if (a_pair.y != 0)
     {
         result.kind = Classified.Kind.Fraction;
-        result.fraction = Fraction (numerator:   input.x,
-                                    denominator: input.y);
+        result.fraction = Fraction.make (a_numerator: a_pair.x, a_denominator: a_pair.y);
     }
     else
     {
         result.kind = Classified.Kind.Invalid;
-        result.invalid = Invalid (message: "Denominator cannot be zero.");
+        result.invalid = Invalid.make (a_message: "Denominator cannot be zero.");
     }
 
     return result;

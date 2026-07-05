@@ -6,9 +6,9 @@ import domain.classified : Classified;
 import domain.invalid    : Invalid;
 
 @safe pure nothrow @nogc
-size_t invalid_vm (Classified input, scope char[] buffer)
+size_t invalid_vm (Classified classified, scope char[] buffer)
 {
-    const Invalid inv = input.invalid;
+    const Invalid inv = classified.invalid;
 
     // Build the message we want to write
     enum prefix = "error: ";

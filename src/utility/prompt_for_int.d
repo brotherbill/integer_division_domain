@@ -5,37 +5,47 @@ module utility.prompt_for_int;
 import std.stdio : readln, write, writeln;
 import std.string : strip;
 
-// UL-grade parser
 @safe pure nothrow @nogc
-bool try_parse_int(string input, out int result)
+bool try_parse_int (in string input, out int result)
 {
+    // Trim whitespace manually (no strip)
     size_t start = 0;
     size_t end   = input.length;
 
     while (start < end && (input[start] == ' ' || input[start] == '\t'))
-        ++start;
+    {
+        start = start + 1;
+    }
 
-    while (end > start && (input[end - 1] == ' ' || input[end - 1] == '\t'))
-        --end;
+    while (start < end && (input[end - 1] == ' ' || input[end - 1] == '\t'))
+    {
+        end = end - 1;
+    }
 
     if (start == end)
+    {
         return false;
+    }
 
-    bool negative = false;
-    size_t i = start;
+    bool   negative = false;
+    size_t i        = start;
 
     if (input[i] == '-')
     {
         negative = true;
-        ++i;
+        i = i + 1;
         if (i == end)
+        {
             return false;
+        }
     }
     else if (input[i] == '+')
     {
-        ++i;
+        i = i + 1;
         if (i == end)
+        {
             return false;
+        }
     }
 
     int value = 0;
@@ -44,14 +54,25 @@ bool try_parse_int(string input, out int result)
     {
         char c = input[i];
 
-        if (c < '0' || c > '9')
-            return false;
+        // Accept commas and underscores
+        if (c == ',' || c == '_')
+        {
+            continue;
+        }
 
+        // Reject anything except digits
+        if (c < '0' || c > '9')
+        {
+            return false;
+        }
         int digit = c - '0';
 
+        // Overflow check
         int newValue = value * 10 + digit;
-        if (newValue < value)
+        if (newValue < value) 
+        {
             return false;
+        }
 
         value = newValue;
     }
@@ -79,11 +100,15 @@ Prompt_Result prompt_for_int(string prompt = "Enter an integer")
         string input = readln().strip();
 
         if (input == "q" || input == "Q")
+        {
             return Prompt_Result(false, 0);
+        }
 
         int parsed;
-        if (try_parse_int(input, parsed))
+        if (try_parse_int(input, parsed)) 
+        {
             return Prompt_Result(true, parsed);
+        }
 
         writeln("Invalid integer. Type 'q' to quit or try again.");
     }
