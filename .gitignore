@@ -1,0 +1,17 @@
+# dub artifacts
+.dub/
+docs.json
+__dummy.html
+
+# DMD build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+
+# Your CLI binary
+bin/app.exe
+bin/app
