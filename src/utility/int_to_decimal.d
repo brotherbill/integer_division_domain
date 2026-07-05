@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/utility/int_to_decimal.d/>
+
 module utility.int_to_decimal;
 
 // Return value is length of buffer used. If buffer is too small, the function will assert.
@@ -44,3 +46,5 @@ size_t int_to_decimal(int value, char[] buf)
 
     return pos;
 }
+
+// End of Document /</repo:integer_division_domain/src/utility/int_to_decimal.d/>

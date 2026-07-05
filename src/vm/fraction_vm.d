@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/vm/fraction_vm.d/>
+
 module vm.fraction_vm;
 
 import domain.classified : Classified;
@@ -61,3 +63,5 @@ size_t fraction_vm (Classified input, scope char[] buffer)
 
     return pos;
 }
+
+// End of Document /</repo:integer_division_domain/src/vm/fraction_vm.d/>

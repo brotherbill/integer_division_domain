@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/domain/classifier.d/>
+
 module domain.classifier;
 
 import domain.integer_pairs : Integer_Pairs;
@@ -24,3 +26,4 @@ Classified classify (Integer_Pairs input)
 
     return result;
 }
+// End of Document /</repo:integer_division_domain/src/domain/classifier.d/>

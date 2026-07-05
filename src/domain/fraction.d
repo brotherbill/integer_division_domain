@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/domain/fraction.d/>
+
 module domain.fraction;
 
 struct Fraction
@@ -17,3 +19,5 @@ struct Fraction
         return numerator % denominator;
     }
 }
+
+// End of Document /</repo:integer_division_domain/src/domain/fraction.d/>

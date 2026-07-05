@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/vm/invalid_vm.d/>
+
 module vm.invalid_vm;
 
 import domain.classified : Classified;
@@ -33,3 +35,5 @@ size_t invalid_vm (Classified input, scope char[] buffer)
 
     return pos; // number of bytes written
 }
+
+// End of Document /</repo:integer_division_domain/src/vm/invalid_vm.d/>

@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/domain/classified.d/>
+
 module domain.classified;
 
 import domain.fraction : Fraction;
@@ -15,3 +17,5 @@ struct Classified
     Fraction fraction;   // always valid when kind == Fraction
     Invalid  invalid;    // always valid when kind == Invalid
 }
+
+// End of Document /</repo:integer_division_domain/src/domain/classified.d/>

@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/utility/prompt_for_int.d/>
+
 module utility.prompt_for_int;
 
 import std.stdio : readln, write, writeln;
@@ -86,3 +88,5 @@ Prompt_Result prompt_for_int(string prompt = "Enter an integer")
         writeln("Invalid integer. Type 'q' to quit or try again.");
     }
 }
+
+// End of Document /</repo:integer_division_domain/src/utility/prompt_for_int.d/>

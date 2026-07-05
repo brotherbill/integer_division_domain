@@ -1,3 +1,5 @@
+// Start of Document /</repo:integer_division_domain/src/app.d/>
+
 module app;
 
 import std.stdio  : writeln;
@@ -53,3 +55,5 @@ void main ()
 
     writeln ("Done.");
 }
+
+// End of Document /</repo:integer_division_domain/src/app.d/>
