@@ -2,30 +2,38 @@
 
 module utility.int_to_decimal;
 
-// Return value is length of buffer used. If buffer is too small, the function will assert.
+// ------------------------------------------------------------
+// Purpose:
+//   UL-grade integer-to-decimal formatter.
+//   - Pure, deterministic, @nogc conversion of an int into a caller-owned buffer.
+//   - No allocations, no Phobos, no diagnostics beyond assert.
+//   - Not a domain, not a classifier, not part of meaning geometry.
+//   - Used only for decimal rendering in VM and utility layers.
+
 @safe pure nothrow @nogc
 size_t int_to_decimal(in int value, char[] buf)
 {
     // Handle zero explicitly
     if (value == 0)
     {
-        assert(0 < buf.length);
+        assert(buf.length > 0);
         buf[0] = '0';
         return 1;
     }
 
-    bool negative = value < 0;
-    uint v = negative ? cast(uint)(-value) : cast(uint)value;  // Absolute value as unsigned integer
+    const bool negative = value < 0;
+    uint v = negative ? cast(uint)(-value) : cast(uint)value;
 
     size_t pos = 0;
 
     // Write digits in reverse order
-    while (0 < v)
+    while (v > 0)
     {
         assert(pos < buf.length);
-        buf[pos] = cast(char)('0' + (v % 10));
-        pos = pos + 1;
-        v = v / 10;
+        const uint digit = v % 10;
+        buf[pos] = cast(char)('0' + digit);
+        pos += 1;
+        v /= 10;
     }
 
     // Add minus sign if needed
@@ -33,13 +41,13 @@ size_t int_to_decimal(in int value, char[] buf)
     {
         assert(pos < buf.length);
         buf[pos] = '-';
-        pos = pos + 1;
+        pos += 1;
     }
 
     // Reverse digits
-    foreach (i; 0 .. pos / 2)
+    for (size_t i = 0; i < pos / 2; ++i)
     {
-        auto tmp = buf[i];
+        const char tmp = buf[i];
         buf[i] = buf[pos - 1 - i];
         buf[pos - 1 - i] = tmp;
     }

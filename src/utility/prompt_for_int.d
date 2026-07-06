@@ -3,34 +3,61 @@
 module utility.prompt_for_int;
 
 import std.stdio : readln, write, writeln;
-import std.string : strip;
+
+// ------------------------------------------------------------
+// Purpose:
+//   UL-grade integer input utility for CLI programs.
+//   - Provides deterministic parsing of user-supplied text into an int.
+//   - No allocations beyond readln(), no Phobos helpers except I/O.
+//   - No exceptions, no GC involvement, no diagnostics beyond assert.
+//   - Not a domain, not a classifier, not part of meaning geometry.
+//   - Used only in CLI-facing layers, never inside VM or domain code.
+//
+//   This module contains:
+//     1. try_parse_int() — UL-grade parser for decimal integers.
+//     2. Prompt_Result   — sealed struct for prompt_for_int() return.
+//     3. prompt_for_int() — CLI loop that repeatedly prompts user.
+//
+//   Failure modes:
+//     - try_parse_int() returns false for invalid input.
+//     - prompt_for_int() returns has_value=false when user quits.
+//     - No runtime error handling; correctness enforced by caller discipline.
+
+// ------------------------------------------------------------
+// UL-grade integer parser
+// ------------------------------------------------------------
 
 @safe pure nothrow @nogc
-bool try_parse_int (in string input, out int result)
+bool try_parse_int(in string input, out int result)
 {
-    // Trim whitespace manually (no strip)
+    // Manual whitespace trim (no strip).
     size_t start = 0;
     size_t end   = input.length;
 
-    while (start < end && (input[start] == ' ' || input[start] == '\t'))
+    while (start < end &&
+           (input[start] == ' ' || input[start] == '\t'))
     {
-        start = start + 1;
+        start += 1;
     }
 
-    while (start < end && (input[end - 1] == ' ' || input[end - 1] == '\t'))
+    while (start < end &&
+           (input[end - 1] == ' ' || input[end - 1] == '\t'))
     {
-        end = end - 1;
+        end -= 1;
     }
 
+    // Empty after trimming → invalid.
     if (start == end)
     {
         return false;
     }
 
-    bool   negative = false;
-    size_t i        = start;
+    bool negative = false;
+    size_t i      = start;
 
-    if (input[i] == '-')
+    // Optional sign.
+    const char first = input[i];
+    if (first == '-')
     {
         negative = true;
         i = i + 1;
@@ -39,7 +66,7 @@ bool try_parse_int (in string input, out int result)
             return false;
         }
     }
-    else if (input[i] == '+')
+    else if (first == '+')
     {
         i = i + 1;
         if (i == end)
@@ -50,26 +77,27 @@ bool try_parse_int (in string input, out int result)
 
     int value = 0;
 
-    for (; i < end; ++i)
+    // Parse digits, allowing commas and underscores.
+    for (; i < end; i = i + 1)
     {
-        char c = input[i];
+        const char c = input[i];
 
-        // Accept commas and underscores
         if (c == ',' || c == '_')
         {
-            continue;
+            continue; // Skip formatting characters.
         }
 
-        // Reject anything except digits
-        if (c < '0' || c > '9')
+        // Reject non-digits.
+        if (!('0' <= c && c <= '9'))
         {
             return false;
         }
-        int digit = c - '0';
 
-        // Overflow check
-        int newValue = value * 10 + digit;
-        if (newValue < value) 
+        const int digit = c - '0';
+
+        // Overflow check.
+        const int newValue = (value * 10) + digit;
+        if (newValue < value)
         {
             return false;
         }
@@ -82,14 +110,18 @@ bool try_parse_int (in string input, out int result)
 }
 
 // ------------------------------------------------------------
-// These MUST be in this module so app.d can import them
+// Prompt_Result — sealed return type for prompt_for_int()
 // ------------------------------------------------------------
 
 struct Prompt_Result
 {
-    bool has_value;
-    int  value;
-};
+    bool has_value; // true → valid integer supplied
+    int  value;     // meaningful only when has_value=true
+}
+
+// ------------------------------------------------------------
+// CLI prompt loop
+// ------------------------------------------------------------
 
 Prompt_Result prompt_for_int(string prompt = "Enter an integer")
 {
@@ -97,15 +129,23 @@ Prompt_Result prompt_for_int(string prompt = "Enter an integer")
     {
         write(prompt, " (or type 'q' to quit): ");
 
-        string input = readln().strip();
+        // readln() allocates; allowed only in CLI layer.
+        string input = readln();
 
+        // Manual trim of newline.
+        if (input.length > 0 && input[$ - 1] == '\n')
+        {
+            input = input[0 .. $ - 1];
+        }
+
+        // Quit command.
         if (input == "q" || input == "Q")
         {
             return Prompt_Result(false, 0);
         }
 
         int parsed;
-        if (try_parse_int(input, parsed)) 
+        if (try_parse_int(input, parsed))
         {
             return Prompt_Result(true, parsed);
         }

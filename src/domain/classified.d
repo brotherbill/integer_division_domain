@@ -14,8 +14,8 @@ struct Classified
 
     Kind kind;
 
-    Fraction fraction;   // always valid when kind == Fraction
-    Invalid  invalid;    // always valid when kind == Invalid
+    Fraction fraction;   // valid if and only if kind == Kind.Fraction
+    Invalid  invalid;    // valid if and only if kind == Kind.Invalid
 }
 
 // End of Document /</repo:integer_division_domain/src/domain/classified.d/>
