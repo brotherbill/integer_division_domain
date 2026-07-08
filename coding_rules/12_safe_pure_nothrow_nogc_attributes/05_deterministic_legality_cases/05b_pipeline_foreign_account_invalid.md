@@ -1,7 +1,7 @@
 ###### Start of Document <repo:integer_division_domain/coding_rules/12_safe_pure_nothrow_nogc_attributes/05_deterministic_legality_cases/05b_pipeline_foreign_account_invalid.md>
 
 # 05b — Pipeline Case: Foreign Account (Invalid)  
-## Full Baton Geometry: ND → D → ND → D → ND
+## Full Baton Geometry: ND → D → ND
 
 ### Abbreviations  
 **ND** — *Non‑Deterministic world*: networks, databases, clocks, outages, concurrency, external dependencies.  
@@ -13,7 +13,7 @@
 This page demonstrates the complete pipeline for a **Foreign Account** legality failure.  
 The baton passes are explicit, sovereign, and SoC‑pure:
 
-**ND → D → ND → D → ND**
+**ND → D → ND**
 
 ND and D never mix.  
 ND prepares.  
@@ -31,30 +31,23 @@ ND captures this intent exactly as stated, without evaluating legality or owners
 ---
 
 # 1. ND Ingress  
-The request enters the system from the nondeterministic world.  
-ND does not interpret legality.  
-ND does not run business rules.  
-ND only captures the operator’s intent.
+ND captures the operator’s intent exactly as stated.
 
-### Ingress Shape (with platoon‑formation comments)
+### Ingress Shape
 
 ```
 {
-    "batonId":              6789,   // Unique baton identity for this request.
-    "customerId":           "C123", // Captured identity only; ND does not validate.
-    "sourceAccountId":      "A555", // Customer's CHECKING account (intent only).
-    "destinationAccountId": "A666", // Some other customer's SAVINGS account (intent only).
-    "amountCents":          10000   // Raw ingress amount in cents; ND does not interpret or normalize.
+    "batonId":              6789,
+    "customerId":           "C123",
+    "sourceAccountId":      "A555",
+    "destinationAccountId": "A666",
+    "amountCents":          10000
 }
 ```
 
-### Intent of the Transaction  
-The customer is attempting to **move funds from A555 to A666**.  
-ND records this intent *exactly as stated*, without evaluating legality, ownership, or jurisdiction.
-
 ### Baton Leaving ND Stage 1 → Entering ND Stage 2  
-ND Stage 1 has only one responsibility: **capture**.  
-Therefore, the baton leaving Stage 1 is **identical** to the ingress shape.
+ND Stage 1 only captures.  
+The baton is unchanged.
 
 **Baton: ND → ND**
 
@@ -71,91 +64,7 @@ Therefore, the baton leaving Stage 1 is **identical** to the ingress shape.
 ---
 
 # 2. ND Acquisition  
-ND gathers all external dependencies:
-
-- customer record  
-- source account  
-- destination account  
-- balances  
-- flags  
-- configuration  
-- ownership metadata  
-- jurisdiction metadata  
-
-ND handles outages, retries, missing data, and nondeterministic delays.  
-ND produces a **raw snapshot**.
-
-**Baton: ND → ND**
-
-```
-{
-    "batonId": 6789,
-
-    "customerRecord": {
-        "customerId":  "C123",
-        "name":        "Alice Example",
-        "status":      "Active",
-        "jurisdiction":"Domestic"
-    },
-
-    "sourceAccountRecord": {
-        "accountId":        "A555",
-        "type":             "Checking",
-        "ownerCustomerId":  "C123",
-        "balanceDollars":   2500.00,
-        "flags": {
-            "active": true,
-            "fraud":  false
-        },
-        "jurisdiction":     "Domestic"
-    },
-
-    "destinationAccountRecord": {
-        "accountId":        "A666",
-        "type":             "Savings",
-        "ownerCustomerId":  "C456",      // belongs to someone else
-        "balanceDollars":   9000.00,
-        "flags": {
-            "active": true,
-            "fraud":  false
-        },
-        "jurisdiction":     "Foreign"    // nondeterministic metadata
-    },
-
-    "transferIntent": {
-        "amountCents":         10000,
-        "sourceAccountId":     "A555",
-        "destinationAccountId":"A666"
-    },
-
-    "systemMetadata": {
-        "acquisitionTimestamp": "2026-07-07T14:22:00Z",
-        "retryCount":           1,
-        "dataSources": [
-            "core-banking-db",
-            "customer-service-api",
-            "account-ledger-service"
-        ],
-        "warnings": [
-            "destination jurisdiction mismatch",
-            "owner mismatch"
-        ]
-    }
-}
-```
-
----
-
-# 3. ND Reality Validation  
-ND ensures the snapshot is structurally coherent:
-
-- all required records exist  
-- no contradictory raw data  
-- no missing fields  
-- no malformed structures  
-
-ND does **not** validate legality, ownership, or business rules.  
-ND only ensures the world is coherent enough for deterministic evaluation.
+ND gathers all external dependencies and produces a raw snapshot.
 
 **Baton: ND → ND**
 
@@ -218,19 +127,26 @@ ND only ensures the world is coherent enough for deterministic evaluation.
 
 ---
 
+# 3. ND Reality Validation  
+ND ensures structural coherence only.
+
+**Baton: ND → ND**
+
+```
+{
+    "batonId": 6789,
+    "customerRecord": { ... },
+    "sourceAccountRecord": { ... },
+    "destinationAccountRecord": { ... },
+    "transferIntent": { ... },
+    "systemMetadata": { ... }
+}
+```
+
+---
+
 # 4. ND Normalization  
-ND shapes raw data into sealed‑domain inputs:
-
-- dollars → cents  
-- external IDs preserved as canonical strings  
-- irrelevant fields removed  
-- structural invariants enforced  
-- jurisdiction metadata preserved  
-
-Normalization is **pure ND shaping**.  
-No business rules.  
-No legality.  
-No sealed‑domain decisions.
+ND shapes raw data into sealed‑domain inputs.
 
 **Baton: ND → ND**
 
@@ -255,7 +171,7 @@ No sealed‑domain decisions.
     "transferAmountCents":     10000,
 
     "flags": {
-        "fraudFlag": false
+        "fraud": false
     }
 }
 ```
@@ -263,43 +179,29 @@ No sealed‑domain decisions.
 ---
 
 # 5. ND Readiness Gate  
-ND asks:
-
-> **“Do we have everything the D world needs to run deterministically?”**
-
-For this case, the answer is **yes**.
-
-ND hands the baton to D.
-
-### Baton Leaving ND Stage 5 → Entering D  
-This is the **sealed‑domain input baton**:
+ND confirms all sealed‑domain inputs are present and hands the baton to D.
 
 **Baton: ND → D**
 
 ```
 {
     "batonId":                 6789,
-
     "customerId":              "C123",
     "sourceAccountId":         "A555",
     "destinationAccountId":    "A666",
-
     "sourceBalanceCents":      250000,
     "destinationBalanceCents": 900000,
     "transferAmountCents":     10000,
-
     "sourceJurisdiction":      "Domestic",
     "destinationJurisdiction": "Foreign",
-
     "ownership": {
         "sourceOwnedByCustomer":      true,
         "destinationOwnedByCustomer": false
     },
-
     "flags": {
         "sourceAccountActive":      true,
         "destinationAccountActive": true,
-        "fraudFlag":                false
+        "fraud":                    false
     }
 }
 ```
@@ -310,23 +212,13 @@ This is the **sealed‑domain input baton**:
 (See jurisdiction legality rules in:  
 `sealed_domain_jurisdiction_rules.md`)
 
-D receives the sealed‑domain inputs.
+D evaluates legality deterministically:
 
-D evaluates legality using deterministic rules:
+- Destination account is **foreign**  
+- Foreign accounts are **outside the sealed domain**  
+- Cross‑jurisdiction transfers are **not allowed**
 
-- Does the source account belong to the customer?  
-- Does the destination account belong to the customer?  
-- Are both accounts domestic?  
-- Are both accounts within the sealed domain?  
-- Are cross‑jurisdiction transfers allowed?  
-
-In this case:
-
-> **Destination account is foreign.  
-> Foreign accounts are outside the sealed domain.  
-> Legality classification = Invalid.**
-
-D returns:
+> **Legality = Invalid (ForeignAccount)**
 
 **Baton: D → ND**
 
@@ -338,38 +230,38 @@ D returns:
 }
 ```
 
-D does **not** execute.  
-D does **not** mutate.  
-D does **not** touch the world.
-
 ---
 
 # 7. ND Finalization  
 ND receives the legality classification.
 
-ND performs nondeterministic finalization:
+Because legality is **Invalid**, ND performs nondeterministic finalization:
 
 - logs the invalid attempt  
 - records the sealed‑domain reason  
 - updates audit trails  
 - returns a stable error to the caller  
-- ensures no partial execution  
-- ensures no corruption  
-- ensures no drift  
 
-Because the legality classification is **Invalid**, the **entire pipeline is NOP (No Operation)** other than logging and audit‑trail recording.
+And critically:
 
-No transfer takes place.  
-No state changes occur.  
-No baton is propagated forward.  
-The baton is **retired** at this point.
+> **The entire pipeline is an effective NOP.  
+> No money moves.  
+> No accounts drift.  
+> No partial mutation occurs.  
+> No reconciliation is required.**
 
-ND finalization is nondeterministic but **safe**:
+The baton is **retired**.
 
-- no money moves  
-- no accounts drift  
-- no partial transactions  
-- no reconciliation required
+**Final Baton: ND → Retired**
+
+```
+{
+    "batonId": 6789,
+    "legality": "Invalid",
+    "finalResult": "Invalid (ForeignAccount)",
+    "effectiveOutcome": "NOP"
+}
+```
 
 ---
 
@@ -382,13 +274,16 @@ ND ingress
 → ND normalization
 → ND readiness gate
 → D legality (Invalid: ForeignAccount)
-→ ND finalization
+→ ND finalization (NOP)
+→ ND → Retired
 ```
 
 ND and D remain fully disjoint.  
-Legality is determined deterministically.  
+Legality is deterministic.  
 Execution is nondeterministic but safe.  
-No stone is left unturned.
+No drift.  
+No partial mutation.  
+No reconciliation.
 
 ---
 

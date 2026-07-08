@@ -1,6 +1,6 @@
-###### Start of Document <repo:integer_division_domain/coding_rules/12_safe_pure_nothrow_nogc_attributes/05_deterministic_legality_cases/05e_pipeline_insufficient_funds_invalid.md>
+###### Start of Document <repo:integer_division_domain/coding_rules/12_safe_pure_nothrow_nogc_attributes/05_deterministic_legality_cases/05g_pipeline_nd_race_condition_failure.md>
 
-# 05e — Pipeline Case: Insufficient Funds (Invalid)  
+# 05g — Pipeline Case: ND Race Condition Failure (Invalid)  
 ## Full Baton Geometry: ND → D → ND
 
 ### Abbreviations  
@@ -10,17 +10,21 @@
 ---
 
 ## Purpose  
-This page demonstrates the complete pipeline for an **Insufficient Funds** transfer attempt.  
-The baton passes are explicit, sovereign, and SoC‑pure:
+This page demonstrates a **race‑condition legality failure**:
 
-**ND → D → ND**
+- ND prepares the baton  
+- D evaluates legality and returns **Valid**  
+- A concurrent nondeterministic event occurs in the real world (spouse withdraws rent money)  
+- ND attempts execution  
+- ND receives **Insufficient Funds** from the database  
+- ND resolves the pipeline as **Invalid (RaceConditionFailure)**  
+- The entire pipeline is an **effective NOP**  
+- No partial mutation occurs  
+- No drift occurs  
+- No reconciliation is required  
 
-ND and D never mix.  
-ND prepares.  
-D decides.  
-ND finalizes.
-
-This case is **Invalid**, and therefore the entire pipeline is an **effective NOP**.
+This case is surprising because legality was **Valid**, yet ND execution fails due to a nondeterministic race.  
+Prax Jr handles this safely.
 
 ---
 
@@ -33,11 +37,9 @@ ND captures this intent exactly as stated.
 # 1. ND Ingress  
 ND captures the operator’s intent exactly as stated.
 
-### Ingress Shape
-
 ```
 {
-    "batonId":              8888,
+    "batonId":              4444,
     "customerId":           "C123",
     "sourceAccountId":      "A100",
     "destinationAccountId": "A200",
@@ -45,15 +47,11 @@ ND captures the operator’s intent exactly as stated.
 }
 ```
 
-### Baton Leaving ND Stage 1 → Entering ND Stage 2  
-ND Stage 1 only captures.  
-The baton is unchanged.
-
 **Baton: ND → ND**
 
 ```
 {
-    "batonId":              8888,
+    "batonId":              4444,
     "customerId":           "C123",
     "sourceAccountId":      "A100",
     "destinationAccountId": "A200",
@@ -64,26 +62,17 @@ The baton is unchanged.
 ---
 
 # 2. ND Acquisition  
-ND gathers all external dependencies and produces a raw snapshot.
+ND gathers all external dependencies.
 
-**Baton: ND → ND**
+Source account has **$1,500 available**, enough for the transfer.
 
 ```
 {
-    "batonId": 8888,
-
-    "customerRecord": {
-        "customerId":  "C123",
-        "name":        "Alice Example",
-        "status":      "Active",
-        "jurisdiction":"Domestic"
-    },
-
     "sourceAccountRecord": {
         "accountId":        "A100",
         "type":             "Checking",
         "ownerCustomerId":  "C123",
-        "balanceDollars":   50.00,    // Only $50 available
+        "balanceDollars":   1500.00,
         "flags": {
             "active": true,
             "fraud":  false
@@ -101,26 +90,11 @@ ND gathers all external dependencies and produces a raw snapshot.
             "fraud":  false
         },
         "jurisdiction":     "Domestic"
-    },
-
-    "transferIntent": {
-        "amountCents":         10000,
-        "sourceAccountId":     "A100",
-        "destinationAccountId":"A200"
-    },
-
-    "systemMetadata": {
-        "acquisitionTimestamp": "2026-07-07T16:30:00Z",
-        "retryCount":           0,
-        "dataSources": [
-            "core-banking-db",
-            "customer-service-api",
-            "account-ledger-service"
-        ],
-        "warnings": []
     }
 }
 ```
+
+**Baton: ND → ND**
 
 ---
 
@@ -129,32 +103,19 @@ ND ensures structural coherence only.
 
 **Baton: ND → ND**
 
-```
-{
-    "batonId": 8888,
-    "customerRecord": { ... },
-    "sourceAccountRecord": { ... },
-    "destinationAccountRecord": { ... },
-    "transferIntent": { ... },
-    "systemMetadata": { ... }
-}
-```
-
 ---
 
 # 4. ND Normalization  
 ND shapes raw data into sealed‑domain inputs.
 
-**Baton: ND → ND**
-
 ```
 {
-    "batonId": 8888,
+    "batonId": 4444,
 
     "customerId":              "C123",
 
     "sourceAccountId":         "A100",
-    "sourceBalanceCents":      5000,    // $50
+    "sourceBalanceCents":      150000,   // $1,500
     "sourceJurisdiction":      "Domestic",
     "sourceOwnedByCustomer":   true,
     "sourceAccountActive":     true,
@@ -165,7 +126,7 @@ ND shapes raw data into sealed‑domain inputs.
     "destinationOwnedByCustomer": true,
     "destinationAccountActive":   true,
 
-    "transferAmountCents":     10000,   // $100
+    "transferAmountCents":     10000,
 
     "flags": {
         "fraudFlag": false
@@ -173,22 +134,23 @@ ND shapes raw data into sealed‑domain inputs.
 }
 ```
 
+**Baton: ND → ND**
+
 ---
 
 # 5. ND Readiness Gate  
-ND confirms all sealed‑domain inputs are present and hands the baton to D.
+ND confirms all sealed‑domain inputs are present.
 
 **Baton: ND → D**
 
 ```
 {
-    "batonId":                 8888,
-
+    "batonId":                 4444,
     "customerId":              "C123",
     "sourceAccountId":         "A100",
     "destinationAccountId":    "A200",
 
-    "sourceBalanceCents":      5000,
+    "sourceBalanceCents":      150000,
     "destinationBalanceCents": 900000,
     "transferAmountCents":     10000,
 
@@ -211,62 +173,99 @@ ND confirms all sealed‑domain inputs are present and hands the baton to D.
 ---
 
 # 6. D Legality Classification  
-(See jurisdiction legality rules in:  
-`sealed_domain_jurisdiction_rules.md`)
-
-D evaluates legality deterministically:
+All sealed‑domain checks pass:
 
 - Ownership: OK  
 - Jurisdiction: OK  
 - Activity: OK  
 - Fraud: OK  
-- **Funds: NOT OK** — `sourceBalanceCents < transferAmountCents`
+- Funds: OK  
 
-The sealed‑domain rule is absolute:
-
-> **Insufficient funds → Legality = Invalid (InsufficientFunds)**
+> **Legality = Valid (AuthorizedDomesticTransfer)**
 
 **Baton: D → ND**
 
 ```
 {
-    "batonId": 8888,
-    "legality": "Invalid",
-    "reason":   "InsufficientFunds"
+    "batonId": 4444,
+    "legality": "Valid",
+    "reason":   "AuthorizedDomesticTransfer"
 }
 ```
 
 ---
 
-# 7. ND Finalization  
-ND receives the legality classification.
+# 7. ND Execution Attempt  
+ND attempts nondeterministic execution:
 
-Because legality is **Invalid**, the entire pipeline is an **effective NOP**:
+- debit source  
+- credit destination  
+- write ledger entry  
+- update audit trail  
 
-- logs the insufficient‑funds attempt  
-- records the sealed‑domain reason  
-- updates audit trails  
-- returns a stable error to the caller  
-- ensures no partial execution  
-- ensures no corruption  
-- ensures no drift  
+But **one millisecond earlier**, the spouse withdraws rent money.
 
-The baton is **retired**.
+Source account balance drops from **$1,500 → $75**.
+
+ND attempts debit of 10000 cents.
+
+Database rejects the debit:
+
+```
+{
+    "error": "InsufficientFunds",
+    "currentBalanceCents": 7500
+}
+```
+
+ND cannot complete execution.
+
+ND produces:
+
+```
+{
+    "batonId": 4444,
+    "executionStatus": "Failed",
+    "failureReason":   "RaceConditionFailure"
+}
+```
+
+---
+
+# 8. ND Finalization  
+ND receives legality = **Valid**, but execution fails due to a nondeterministic race.
+
+Because ND execution failed:
+
+- no money moves  
+- no accounts drift  
+- no partial mutation occurs  
+- no ledger entries are written  
+- no audit‑trail mutations occur  
+- no state changes of any kind occur  
+- the baton is retired without execution  
+
+The pipeline’s net effect is:
+
+> **A perfect NOP — despite legality being Valid.**
+
+ND logs the failure and returns a stable error to the caller.
 
 **Final Baton: ND → Retired**
 
 ```
 {
-    "batonId": 8888,
-    "legality": "Invalid",
-    "finalResult": "Invalid (InsufficientFunds)",
+    "batonId": 4444,
+    "legality": "Valid",
+    "execution": "Failed",
+    "finalResult": "Invalid (RaceConditionFailure)",
     "effectiveOutcome": "NOP"
 }
 ```
 
 ---
 
-# 8. Summary of Baton Passes
+# 9. Summary of Baton Passes
 
 ```
 ND ingress
@@ -274,18 +273,20 @@ ND ingress
 → ND reality validation
 → ND normalization
 → ND readiness gate
-→ D legality (Invalid: InsufficientFunds)
+→ D legality (Valid)
+→ ND execution race‑condition failure
 → ND finalization (NOP)
 → ND → Retired
 ```
 
 ND and D remain fully disjoint.  
 Legality is deterministic.  
-Execution is nondeterministic but safe.  
-No partial execution.  
+Execution is nondeterministic.  
+Race‑condition failure is safe.  
 No drift.  
+No partial mutation.  
 No reconciliation.
 
 ---
 
-###### End of Document <repo:integer:division_domain/coding_rules/12_safe_pure_nothrow_nogc_attributes/05_deterministic_legality_cases/05e_pipeline_insufficient_funds_invalid.md>
+###### End of Document <repo:integer_division_domain/coding_rules/12_safe_pure_nothrow_nogc_attributes/05_deterministic_legality_cases/05g_pipeline_nd_race_condition_failure.md>
